@@ -1,0 +1,64 @@
+admin:
+  access_log_path: /tmp/admin_access.log
+  address:
+    socket_address: { address: 127.0.0.1, port_value: 3451 }
+
+static_resources:
+  listeners:
+  - name: listener_0
+    address:
+      socket_address: { address: 0.0.0.0, port_value: 4321 }
+    filter_chains:
+    - filters:
+      - name: envoy.http_connection_manager
+        config:
+          stat_prefix: ingress_http
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: local_service
+              domains: ["*"]
+              routes:
+              - match: { prefix: "/" }
+                route:
+                  cluster: simple_service
+                  retry_policy:
+                    retry_on: 5xx
+                    num_retries: 10
+                    per_try_timeout: 0.300s
+          http_filters:
+          - name: envoy.router
+  clusters:
+  - name: simple_service
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: egress_app
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: 240.10.0.4
+                port_value: 80
+        - endpoint:
+            address:
+              socket_address:
+                address: 240.10.0.5
+                port_value: 90
+        - endpoint:
+            address:
+              socket_address:
+                address: 240.10.0.6
+                port_value: 100
+        - endpoint:
+            address:
+              socket_address:
+                address: 240.10.0.7
+                port_value: 110
+        - endpoint:
+            address:
+              socket_address:
+                address: 240.10.0.8
+                port_value: 120
