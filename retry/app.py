@@ -4,6 +4,7 @@
 import sys
 import time
 from flask import Flask, abort
+import time
 from redis import Redis, RedisError
 import os
 import socket
@@ -23,6 +24,10 @@ def hello():
         sys.stdout.write("Visit " + str(visits) + "\n")
     except RedisError:
         visits = '<i>cannot connect to Redis, counter disabled</i>'
+
+    if(os.getenv('SLEEP')):
+        print('sleep seconds...' + os.getenv('SLEEP'))
+        time.sleep(float(os.getenv('SLEEP')))
     
     if os.getenv('STATE', 'Ok') == 'Error' :
         time.sleep(5)
