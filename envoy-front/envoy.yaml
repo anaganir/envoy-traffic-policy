@@ -21,17 +21,27 @@ static_resources:
               routes:
               - match: { prefix: "/retry" }
                 route:
-                  cluster: retry_service
+                  cluster: egress_service
+                  timeout: 20s
+#                  retry_policy:
+#                    retry_on: 5xx
+#                    num_retries: 5
+#                    per_try_timeout: 4s
               - match: { prefix: "/" }
                 route:
-                  cluster: simple_service
+                  cluster: ingress_service
+                  timeout: 20s
           http_filters:
           - name: envoy.router
   clusters:
-  - name: retry_service
+  - name: egress_service
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
+#    circuit_breakers:
+#      thresholds:
+#      - priority: DEFAULT
+#        max_connections: 3
     load_assignment:
       cluster_name: retry_app
       endpoints:
@@ -41,12 +51,17 @@ static_resources:
               socket_address:
                 address: 240.10.0.2
                 port_value: 4321
-  - name: simple_service
+  - name: ingress_service
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
+#    circuit_breakers:
+#      thresholds:
+#      - priority: DEFAULT
+#        max_connections: 3
+#        max_pending_requests: 1
     load_assignment:
-      cluster_name: egress_app
+      cluster_name: app
       endpoints:
       - lb_endpoints:
         - endpoint:

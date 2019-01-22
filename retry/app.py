@@ -30,7 +30,6 @@ def hello():
         time.sleep(float(os.getenv('SLEEP')))
     
     if os.getenv('STATE', 'Ok') == 'Error' :
-        time.sleep(5)
         abort(504, {'message':'Force error'})
 
     html = \

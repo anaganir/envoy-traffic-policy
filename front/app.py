@@ -15,6 +15,7 @@ def hello():
         print('sleep seconds...' + os.getenv('SLEEP'))
         time.sleep(float(os.getenv('SLEEP')))
     print('request...')
+    # Using envoy's address to communicate to the S2
     r = requests.get('http://240.10.0.10:1234/retry')
     print(r.text)
     return r.text
